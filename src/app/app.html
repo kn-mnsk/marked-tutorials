@@ -1,2 +1,10 @@
 <p>App template</p>
-<router-outlet />
+<nav class="nav">
+  <ul>
+    <li routerLinkActive="active"><a [routerLink]="['/home/example1']">Example 1</a></li>
+    <!-- <li><a routerLink="security">Security</a></li> -->
+  </ul>
+</nav>
+
+<!-- <app-custom-md-comp-sys/> -->
+<router-outlet/>
