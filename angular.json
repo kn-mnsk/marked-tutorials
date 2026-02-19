@@ -2,7 +2,8 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": "bda11df9-5487-4aa0-ac5d-d55849619bc8"
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -27,7 +28,9 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              }
+              },
+              "src/assets",
+              "src/app"
             ],
             "styles": [
               "src/styles.scss"
