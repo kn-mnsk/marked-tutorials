@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, signal, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-import { Tokens, Token, Marked, Tokenizer, MarkedExtension, marked, Parser, Lexer, TokenizerAndRendererExtension, lexer, parser, MarkedOptions, Renderer, TokenizerExtension, RendererThis, TokenizerThis } from 'marked'
+import { Tokens, Token, Marked, Tokenizer, MarkedExtension, marked, Parser, Lexer, TokenizerAndRendererExtension, lexer, parser, MarkedOptions, Renderer, TokenizerExtension, RendererThis, TokenizerThis, TokensList, TokenizerExtensionFunction, RendererExtension } from 'marked'
 
 @Component({
   selector: 'app-custom-md-comp-sys',
@@ -14,6 +14,7 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
   protected readonly className = signal('CustomMdCompSys');
   private readonly $isBrowser = signal<boolean>(false);
 
+  private Lexer = new Lexer();
   // private noteExtension: MarkedExtension = {
   //   extensions: [
   //     {
@@ -96,15 +97,65 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.$isBrowser()) {
 
-      const descriptionList:TokenizerAndRendererExtension<string, string> | RendererThis<string, string> | TokenizerThis |Lexer<string,  string>= {
+      const divEl = document.getElementById('custom-md-comp-sys');
+      if (!divEl) return;
+
+      // 1. Tokenizer
+      console.log(`1. Tokenizer`);
+      // Override function
+      const tokenizer: any = {
+        codespan(src: any) {
+          const match = src.match(/^\$+([^\$\n]+?)\$+/);
+          if (match) {
+            return {
+              type: 'codespan',
+              raw: match[0],
+              text: match[1].trim()
+            };
+          }
+
+          // return false to use original codespan tokenizer
+          return false;
+        }
+      };
+
+      marked.use({ tokenizer });
+
+      const parsedTokenizer = marked.parse('$ N^2 latex code $\n\n` other code `', { async: false });
+      // Run marked
+      console.log(parsedTokenizer);
+      // divEl.innerHTML = parsedTokenizer;
+
+      // 2. Walk Tokens
+      console.log(`2. Walk Tokens`);
+
+      // Override function
+      const walkTokens_a = (token: any) => {
+        if (token.type === 'heading') {
+          token.depth += 1;
+        }
+      };
+
+      // marked.use({ walkTokens_a });
+      // Run marked
+      const parsedWalkToken = marked.parse('# heading 2 \n## heading 3', { async: false });
+
+      console.log(parsedWalkToken);
+
+      // 3. Extensions
+      console.log(`3. Extensions: 1) descriptionList`);
+
+      const descriptionList: TokenizerAndRendererExtension<string, string> = {
+        // const descriptionList: RendererExtension<string, string> | TokenizerExtension = {
         name: 'descriptionList',
         level: 'block',                                     // Is this a block-level or inline-level tokenizer?
-        // start(src: any) { return src.match(/:[^:\n]/)?.index; }, // Hint to Marked.js to stop and check for a match
-        // parser: null as unknown as Parser<string,  string>,
-        // lexer: null as unknown as Lexer<string,  string>,
-        tokenizer(src: any, tokens: any) {
+        start(src: string) { return src.match(/:[^:\n]/)?.index; }, // Hint to Marked.js to stop and check for a match
+        tokenizer(src: string, tokens: TokensList | Token[]) {
+          // tokenizer(src: string, tokens: TokensList | Token[]) {
           const rule = /^(?::[^:\n]+:[^:\n]*(?:\n|$))+/;    // Regex for the complete token, anchor to string start
           const match = rule.exec(src);
+          console.log(`descriptionList tokenizer tokens`, tokens);
+
           if (match) {
             const token = {                                 // Token to generate
               type: 'descriptionList',                      // Should match "name" above
@@ -115,52 +166,75 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
             this.lexer.inline(token.text, token.tokens);    // Queue this data to be processed for inline tokens
             return token;
           }
+
+          return undefined;
         },
-        renderer(token: any) {
+        renderer(token: Tokens.Generic) {
+          if (!token.tokens) return undefined;
           return `<dl>${this.parser.parseInline(token.tokens)}\n</dl>`; // parseInline to turn child tokens into HTML
         }
       };
 
-      const description = {
+      console.log(`3. Extensions: 2) description`);
+
+      const description: TokenizerAndRendererExtension = {
         name: 'description',
         level: 'inline',                                 // Is this a block-level or inline-level tokenizer?
-        start(src: any) { return src.match(/:/)?.index; },    // Hint to Marked.js to stop and check for a match
-        tokenizer(src: any, tokens: any) {
+        start(src: string) { return src.match(/:/)?.index; },    // Hint to Marked.js to stop and check for a match
+
+        tokenizer(src: string, tokens: TokensList | Token[]) {
           const rule = /^:([^:\n]+):([^:\n]*)(?:\n|$)/;  // Regex for the complete token, anchor to string start
           const match = rule.exec(src);
+
+          console.log(`description tokenizer tokens`, src, tokens);
+
           if (match) {
-            return {                                         // Token to generate
+            return {                               // Token to generate
               type: 'description',                           // Should match "name" above
               raw: match[0],                                 // Text to consume from the source
               dt: this.lexer.inlineTokens(match[1].trim()),  // Additional custom properties, including
-              // dt: this.lexer.inlineTokens(match[1].trim()),  // Additional custom properties, including
-              dd: this.lexer.inlineTokens(match[2].trim())   //   any further-nested inline tokens
-            };
+              dd: this.lexer.inlineTokens(match[2].trim())   //   any further-nested inline tokens}
+            }
           }
+          return undefined;
         },
-        renderer(token: any) {
-          return `\n<dt>${this.parser.parseInline(token.dt)}</dt><dd>${this.parser.parseInline(token.dd)}</dd>`;
+        renderer(token: Tokens.Generic) {
+          if (!token.tokens) return undefined;
+          return `\n<dt>${this.parser.parseInline(token['dt'])}</dt><dd>${this.parser.parseInline(token['dd'])}</dd>`;
         },
+
         childTokens: ['dt', 'dd'],                 // Any child tokens to be visited by walkTokens
       };
 
-      function walkTokens(token: any) {                        // Post-processing on the completed token tree
+      console.log(`3. Extensions: 3) walk tokens`);
+
+      const walkTokens = (token: any) => {                        // Post-processing on the completed token tree
         if (token.type === 'strong') {
           token.text += ' walked';
-          token.tokens = this.Lexer.lexInline(token.text)
+          token.tokens = this.Lexer.inlineTokens(token.text)
         }
       }
-      marked.use({ extensions: [descriptionList, description], walkTokens });
+
+      // marked.use({ extensions: [descriptionList, description], walkTokens });
 
       // EQUIVALENT TO:
+      console.log(`3. Extensions: 4) run marked: descriptionList`);
+      marked.use({ extensions: [descriptionList] , async: false});
 
-      marked.use({ extensions: [descriptionList] });
-      marked.use({ extensions: [description] });
-      marked.use({ walkTokens })
+      console.log(`3. Extensions: 5) run marked: description`);
+      marked.use({ extensions: [description], async: false });
 
-      console.log(marked.parse('A Description List:\n'
-        + ':   Topic 1   :  Description 1\n'
-        + ': **Topic 2** : *Description 2*'));
+      console.log(`3. Extensions: 6) run marked: walkTokens`);
+      marked.use({ walkTokens, async: false })
+
+      const parsedExtension = marked.parse('\n\n&emsp;A Description List\n'
+        + '\n&emsp; __Topic 1__     Description 1 \n'
+        + '&emsp; **Topic 2**  ***Description 2***', { async: false });
+      console.log(parsedExtension);
+
+
+      // Results
+      divEl.innerHTML = parsedTokenizer + parsedWalkToken + parsedExtension;
 
     }
 
