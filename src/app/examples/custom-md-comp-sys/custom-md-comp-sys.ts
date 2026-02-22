@@ -2,10 +2,13 @@ import { AfterViewInit, Component, OnDestroy, OnInit, signal, PLATFORM_ID, Injec
 import { isPlatformBrowser } from '@angular/common';
 
 import { Tokens, Token, Marked, Tokenizer, MarkedExtension, marked, Parser, Lexer, TokenizerAndRendererExtension, lexer, parser, MarkedOptions, Renderer, TokenizerExtension, RendererThis, TokenizerThis, TokensList, TokenizerExtensionFunction, RendererExtension } from 'marked'
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-custom-md-comp-sys',
-  imports: [],
+  imports: [
+    RouterLink
+  ],
   templateUrl: './custom-md-comp-sys.html',
   styleUrl: './custom-md-comp-sys.scss',
 })
@@ -97,7 +100,7 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.$isBrowser()) {
 
-      const divEl = document.getElementById('custom-md-comp-sys');
+      const divEl = document.getElementById('example1');
       if (!divEl) return;
 
       // 1. Tokenizer
