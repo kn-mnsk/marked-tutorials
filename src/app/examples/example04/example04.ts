@@ -107,13 +107,15 @@ export class Example04 implements OnInit, AfterViewInit, OnDestroy {
         const t = tokens as TokensList
         refLinks = t.links;
 
+        console.log(`Log: ${this.$className()} refLinks=`, refLinks, tokens);
+
         return tokens;
       }
 
-        // `provideLexer?(this: Hooks<string, string>): (<ParserOutput = string, RendererOutput = string>(src: string, options?: MarkedOptions<ParserOutput, RendererOutput>) => Token[]) | Promise<(<ParserOutput = string, RendererOutput = string>(src: string, options?: MarkedOptions<ParserOutput, RendererOutput>) => Token[])>`
+      // `provideLexer?(this: Hooks<string, string>): (<ParserOutput = string, RendererOutput = string>(src: string, options?: MarkedOptions<ParserOutput, RendererOutput>) => Token[]) | Promise<(<ParserOutput = string, RendererOutput = string>(src: string, options?: MarkedOptions<ParserOutput, RendererOutput>) => Token[])>`
 
 
-      function provideLexer(this: Hooks<string, string>):<ParserOutput = string, RendererOutput = string>(src: string, options?: MarkedOptions<ParserOutput, RendererOutput> | undefined) => Token[] {
+      function provideLexer(this: Hooks<string, string>): <ParserOutput = string, RendererOutput = string>(src: string, options?: MarkedOptions<ParserOutput, RendererOutput> | undefined) => Token[] {
         return <ParserOutput = string, RendererOutput = string>(src: string, options: MarkedOptions<ParserOutput, RendererOutput> | undefined) => {
 
           const lexer = new Lexer(options);
