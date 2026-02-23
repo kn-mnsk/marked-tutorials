@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, signal, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-import { Tokens, Token, MarkedExtension, marked, Lexer, TokenizerAndRendererExtension, Renderer, TokensList, TokenizerObject } from 'marked'
+import { Token, Lexer, Renderer, Marked } from 'marked'
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -17,8 +17,8 @@ export class Example03 implements OnInit, AfterViewInit, OnDestroy {
   protected readonly className = signal('ExtendingMark02');
   private readonly $isBrowser = signal<boolean>(false);
 
-  private Lexer = new Lexer();
-
+  private marked: Marked | null = null
+  private Lexer: Lexer | null = null;
   private divEl: HTMLElement | null = null;
 
   constructor(@Inject(PLATFORM_ID) platformId: Object,
@@ -36,6 +36,9 @@ export class Example03 implements OnInit, AfterViewInit, OnDestroy {
 
 
     if (this.$isBrowser()) {
+
+      this.marked = new Marked();
+      this.Lexer = new Lexer();
 
       this.divEl = document.getElementById('example3');
 
@@ -58,18 +61,18 @@ export class Example03 implements OnInit, AfterViewInit, OnDestroy {
             token.title = 'invalid';
 
           }
-          token.tokens = this.Lexer.inlineTokens(token.text)
+          token.tokens = this.Lexer?.inlineTokens(token.text)
 
         }
       };
 
-      marked.use({
+      this.marked.use({
         async: true,
         renderer: new Renderer(),
         walkTokens: walkTokens,
       });
 
-      const html = await marked.parse(md);
+      const html = await this.marked.parse(md);
       this.divEl.innerHTML = html;
 
     }
@@ -78,7 +81,12 @@ export class Example03 implements OnInit, AfterViewInit, OnDestroy {
 
 
   ngOnDestroy(): void {
-    marked.use({async: false});
+    if (this.marked) {
+      this.marked = null;
+    }
+    if (this.Lexer) {
+      this.Lexer = null;
+    }
     this.divEl = null;
 
   }
