@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, signal, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-import { Tokens, Token, Marked, Tokenizer, MarkedExtension, marked, Parser, Lexer, TokenizerAndRendererExtension, lexer, parser, MarkedOptions, Renderer, TokenizerExtension, RendererThis, TokenizerThis, TokensList, TokenizerExtensionFunction, RendererExtension } from 'marked'
+import { Tokens, Token, Marked, Lexer, TokenizerAndRendererExtension, TokensList } from 'marked'
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -17,37 +17,10 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
   protected readonly className = signal('CustomMdCompSys');
   private readonly $isBrowser = signal<boolean>(false);
 
-  private Lexer = new Lexer();
-  // private noteExtension: MarkedExtension = {
-  //   extensions: [
-  //     {
-  //       name: "component-block",
-  //       level: "block", // block-level tokenizer
-  //       start(src) {
-  //         return src.match(/:::/)?.index;
-  //       },
-  //       tokenizer(src, tokens) {
-  //         const rule = /^:::(\w+)\n([\s\S]+?)\n:::/;
-  //         const match = rule.exec(src);
+  private marked: Marked | null = null;
+  private Lexer: Lexer | null = null;
+  private divEl: HTMLElement | null = null;
 
-  //         if (match) {
-  //           const token = {
-  //             type: "component-block",
-  //             raw: match[0],
-  //             component: match[1],
-  //             text: match[2].trim(),
-  //             tokens: []
-  //           };
-  //           this.lexer.inline(token.text, token.tokens);
-
-  //           return token;
-  //         }
-
-  //       },
-
-  //     }
-  //   ]
-  // };
 
   constructor(@Inject(PLATFORM_ID) platformId: Object,
   ) {
@@ -62,49 +35,18 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
 
-
-
-    // const noteExtension: MarkedExtension = {
-    //   extensions: [
-    //     {
-    //       name: "componentblock",
-    //       level: "block", // block-level tokenizer
-    //       start(src) {
-    //         return src.match(/:::/)?.index;
-    //       },
-    //       tokenizer(src, tokens) {
-    //         const rule = /^:::(\w+)\n([\s\S]+?)\n:::/;
-    //         const match = rule.exec(src);
-    //         const token = {
-    //           type: "componentblock",
-    //           raw: '',
-    //           component: '',
-    //           text: '',
-    //           tokens: []
-    //         };
-    //         if (match) {
-    //           token.raw = match[0];
-    //           token.component = match[1];
-    //           token.text = match[2].trim();
-    //         }
-    //         this.lexer.inline(token.text, token.tokens);
-    //         return token;
-    //       },
-    //       renderer(token: any) {
-    //         return `<aside class="${token.component}">${marked.parse(token.text)}</aside>`;
-    //       },
-    //       childTokens: ['componentblock'],
-    //     }
-    //   ]
-    // };
-
     if (this.$isBrowser()) {
 
-      const divEl = document.getElementById('example1');
-      if (!divEl) return;
+      this.marked = new Marked();
+      this.Lexer = new Lexer();
+
+      this.divEl = document.getElementById('example1');
+      if (!this.divEl) return;
+
+      this.divEl.innerHTML = '';// initialize
 
       // 1. Tokenizer
-      console.log(`1. Tokenizer`);
+      // console.log(`1. Tokenizer`);
       // Override function
       const tokenizer: any = {
         codespan(src: any) {
@@ -122,15 +64,15 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
         }
       };
 
-      marked.use({ async: false, tokenizer });
+      this.marked.use({ async: false, tokenizer });
 
-      const parsedTokenizer = marked.parse('$ N^2 latex code $\n\n` other code `');
+      const parsedTokenizer = this.marked.parse('$ N^2 latex code $\n\n` other code `');
       // Run marked
-      console.log(parsedTokenizer);
+      // console.log(parsedTokenizer);
       // divEl.innerHTML = parsedTokenizer;
 
       // 2. Walk Tokens
-      console.log(`2. Walk Tokens`);
+      // console.log(`2. Walk Tokens`);
 
       // Override function
       const walkTokens_a = (token: any) => {
@@ -146,7 +88,7 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
       // console.log(parsedWalkToken);
 
       // 3. Extensions
-      console.log(`3. Extensions: 1) descriptionList`);
+      // console.log(`3. Extensions: 1) descriptionList`);
 
       const descriptionList: TokenizerAndRendererExtension<string, string> = {
         // const descriptionList: RendererExtension<string, string> | TokenizerExtension = {
@@ -157,7 +99,7 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
           // tokenizer(src: string, tokens: TokensList | Token[]) {
           const rule = /^(?::[^:\n]+:[^:\n]*(?:\n|$))+/;    // Regex for the complete token, anchor to string start
           const match = rule.exec(src);
-          console.log(`descriptionList tokenizer tokens`, tokens);
+          // console.log(`descriptionList tokenizer tokens`, tokens);
 
           if (match) {
             const token = {                                 // Token to generate
@@ -178,7 +120,7 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
         }
       };
 
-      console.log(`3. Extensions: 2) description`);
+      // console.log(`3. Extensions: 2) description`);
 
       const description: TokenizerAndRendererExtension = {
         name: 'description',
@@ -189,7 +131,7 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
           const rule = /^:([^:\n]+):([^:\n]*)(?:\n|$)/;  // Regex for the complete token, anchor to string start
           const match = rule.exec(src);
 
-          console.log(`description tokenizer tokens`, src, tokens);
+          // console.log(`description tokenizer tokens`, src, tokens);
 
           if (match) {
             return {                               // Token to generate
@@ -209,43 +151,51 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
         childTokens: ['dt', 'dd'],                 // Any child tokens to be visited by walkTokens
       };
 
-      console.log(`3. Extensions: 3) walk tokens`);
+      // console.log(`3. Extensions: 3) walk tokens`);
 
       const walkTokens = (token: any) => {                        // Post-processing on the completed token tree
         if (token.type === 'strong') {
           token.text += ' walked';
-          token.tokens = this.Lexer.inlineTokens(token.text)
+          token.tokens = this.Lexer?.inlineTokens(token.text)
         }
       }
 
       // marked.use({ extensions: [descriptionList, description], walkTokens });
 
       // EQUIVALENT TO:
-      console.log(`3. Extensions: 4) run marked: descriptionList`);
-      marked.use({ extensions: [descriptionList] , async: false});
+      // console.log(`3. Extensions: 4) run marked: descriptionList`);
+      this.marked.use({ extensions: [descriptionList], async: false });
 
-      console.log(`3. Extensions: 5) run marked: description`);
-      marked.use({ extensions: [description], async: false });
+      // console.log(`3. Extensions: 5) run marked: description`);
+      this.marked.use({ extensions: [description], async: false });
 
-      console.log(`3. Extensions: 6) run marked: walkTokens`);
-      marked.use({ walkTokens, async: false })
+      // console.log(`3. Extensions: 6) run marked: walkTokens`);
+      this.marked.use({ walkTokens, async: false })
 
-      const parsedExtension = marked.parse('\n\n&emsp;A Description List\n'
+      const parsedExtension = this.marked.parse('\n\n&emsp;A Description List\n'
         + '\n&emsp; __Topic 1__     Description 1 \n'
-        + '&emsp; **Topic 2**  ***Description 2***', {async: false});
-      console.log(parsedExtension);
+        + '&emsp; **Topic 2**  ***Description 2***', { async: false });
+      // console.log(parsedExtension);
 
 
       // Results
-      divEl.innerHTML = parsedTokenizer +  parsedExtension;
+      this.divEl.innerHTML = parsedTokenizer + parsedExtension;
 
     }
 
   }
 
   ngOnDestroy(): void {
+    if (this.marked) {
+      this.marked = null;
+    }
+    if (this.Lexer) {
+      this.Lexer = null;
+    }
+    this.divEl = null;
 
   }
+
 
 
 }

@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, signal, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-import { Tokens, Token, MarkedExtension, marked, Lexer, TokenizerAndRendererExtension, Renderer, TokensList, TokenizerObject } from 'marked'
+import { Tokens, Token, MarkedExtension, Marked, Lexer, TokenizerAndRendererExtension, Renderer, TokensList, TokenizerObject } from 'marked'
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -17,8 +17,8 @@ export class ExtendingMark02 implements OnInit, AfterViewInit, OnDestroy {
   protected readonly className = signal('ExtendingMark02');
   private readonly $isBrowser = signal<boolean>(false);
 
-  private Lexer = new Lexer();
-
+  private marked: Marked | null = null
+  private Lexer: Lexer | null = null;
   private divEl: HTMLElement | null = null;
 
   constructor(@Inject(PLATFORM_ID) platformId: Object,
@@ -37,6 +37,15 @@ export class ExtendingMark02 implements OnInit, AfterViewInit, OnDestroy {
 
     if (this.$isBrowser()) {
 
+      this.marked = new Marked();
+      this.Lexer = new Lexer();
+
+      this.divEl = document.getElementById('example2');
+
+      if (!this.divEl) return;
+      this.divEl.innerHTML = '';// initialize
+
+
       const md =
         '&emsp; $ N^2 latex code $ \n &emsp; `other code` \n\n' +
         '# heading 2 \n## heading 3 \n\n' +
@@ -45,13 +54,8 @@ export class ExtendingMark02 implements OnInit, AfterViewInit, OnDestroy {
         ': **Topic 2** : ___Description 2___ \n\n';
 
 
-      this.divEl = document.getElementById('example2');
-
-      if (!this.divEl) return;
-      this.divEl.innerHTML = '';// initialize
-
       // 1. Tokenizer
-      console.log(`1. Tokenizer`);
+      // console.log(`1. Tokenizer`);
       // Override function
       const tokenizer: TokenizerObject = {
         codespan(src: string) {
@@ -70,23 +74,23 @@ export class ExtendingMark02 implements OnInit, AfterViewInit, OnDestroy {
       };
 
       // 2. Walk Tokens
-      console.log(`2. Walk Tokens`);
+      // console.log(`2. Walk Tokens`);
 
       // Override function
       const walkTokens = (token: Token) => {
         if (token.type === 'heading') {
           token.depth += 1;
           token.text = 'walkedHeading(' + token.text + ')';
-          token.tokens = this.Lexer.inlineTokens(token.text)
+          token.tokens = this.Lexer?.inlineTokens(token.text)
         }
         if (token.type === 'strong') {
           token.text = 'walkedStrong(' + token.text + ')';
-          token.tokens = this.Lexer.inlineTokens(token.text)
+          token.tokens = this.Lexer?.inlineTokens(token.text)
         }
       };
 
       // 3. Extensions
-      console.log(`3. Extensions: 1) descriptionList`);
+      // console.log(`3. Extensions: 1) descriptionList`);
 
       const descriptionList: TokenizerAndRendererExtension<string, string> = {
         name: 'descriptionList',
@@ -117,7 +121,7 @@ export class ExtendingMark02 implements OnInit, AfterViewInit, OnDestroy {
         }
       };
 
-      console.log(`3. Extensions: 2) description`);
+      // console.log(`3. Extensions: 2) description`);
 
       const description: TokenizerAndRendererExtension = {
         name: 'description',
@@ -156,9 +160,9 @@ export class ExtendingMark02 implements OnInit, AfterViewInit, OnDestroy {
         walkTokens: walkTokens
       }
 
-      marked.use(markedExtension);
+      this.marked.use(markedExtension);
 
-      const parsedAll = marked.parse(md, { async: false });
+      const parsedAll = this.marked.parse(md, { async: false });
       // Results
       this.divEl.innerHTML = parsedAll
 
@@ -167,6 +171,12 @@ export class ExtendingMark02 implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.marked) {
+      this.marked = null;
+    }
+    if (this.Lexer) {
+      this.Lexer = null;
+    }
     this.divEl = null;
 
   }
