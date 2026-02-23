@@ -1,14 +1,10 @@
 import { Component, signal } from '@angular/core';
-import { RouterOutlet, RouterLinkActive, RouterLink } from '@angular/router';
-import { CustomMdCompSys } from './examples/custom-md-comp-sys/custom-md-comp-sys';
+import { RouterOutlet,  } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   imports: [
-    // CustomMdCompSys,
-    RouterOutlet,
-    RouterLink,
-    RouterLinkActive
+    RouterOutlet
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'

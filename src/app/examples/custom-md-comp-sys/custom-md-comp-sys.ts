@@ -122,9 +122,9 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
         }
       };
 
-      marked.use({ tokenizer });
+      marked.use({ async: false, tokenizer });
 
-      const parsedTokenizer = marked.parse('$ N^2 latex code $\n\n` other code `', { async: false });
+      const parsedTokenizer = marked.parse('$ N^2 latex code $\n\n` other code `');
       // Run marked
       console.log(parsedTokenizer);
       // divEl.innerHTML = parsedTokenizer;
@@ -141,9 +141,9 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
 
       // marked.use({ walkTokens_a });
       // Run marked
-      const parsedWalkToken = marked.parse('# heading 2 \n## heading 3', { async: false });
+      // const parsedWalkToken = marked.parse('# heading 2 \n## heading 3');
 
-      console.log(parsedWalkToken);
+      // console.log(parsedWalkToken);
 
       // 3. Extensions
       console.log(`3. Extensions: 1) descriptionList`);
@@ -232,12 +232,12 @@ export class CustomMdCompSys implements OnInit, AfterViewInit, OnDestroy {
 
       const parsedExtension = marked.parse('\n\n&emsp;A Description List\n'
         + '\n&emsp; __Topic 1__     Description 1 \n'
-        + '&emsp; **Topic 2**  ***Description 2***', { async: false });
+        + '&emsp; **Topic 2**  ***Description 2***', {async: false});
       console.log(parsedExtension);
 
 
       // Results
-      divEl.innerHTML = parsedTokenizer + parsedWalkToken + parsedExtension;
+      divEl.innerHTML = parsedTokenizer +  parsedExtension;
 
     }
 

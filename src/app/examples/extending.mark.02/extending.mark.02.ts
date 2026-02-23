@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy, OnInit, signal, PLATFORM_ID, Inject } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 
-import { Tokens, Token, Marked, Tokenizer, MarkedExtension, marked, Parser, Lexer, TokenizerAndRendererExtension, lexer, parser, MarkedOptions, Renderer, TokenizerExtension, RendererThis, TokenizerThis, TokensList, TokenizerExtensionFunction, RendererExtension, TokenizerObject } from 'marked'
+import { Tokens, Token, MarkedExtension, marked, Lexer, TokenizerAndRendererExtension, Renderer, TokensList, TokenizerObject } from 'marked'
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -149,6 +149,7 @@ export class ExtendingMark02 implements OnInit, AfterViewInit, OnDestroy {
       };
 
       const markedExtension: MarkedExtension<string, string> = {
+        async: false,
         extensions: [descriptionList],
         renderer: new Renderer(),
         tokenizer: tokenizer,

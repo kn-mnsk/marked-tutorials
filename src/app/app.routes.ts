@@ -3,6 +3,7 @@ import { CustomMdCompSys } from './examples/custom-md-comp-sys/custom-md-comp-sy
 import { App } from './app';
 import { ExtendingMark02 } from './examples/extending.mark.02/extending.mark.02';
 import { Home } from './home/home';
+import { Example03 } from './examples/example03/example03';
 
 export const routes: Routes = [
   {
@@ -20,6 +21,11 @@ export const routes: Routes = [
     path: "example2",
     title: "example2",
     component: ExtendingMark02
+  },
+  {
+    path: "example3",
+    title: "example3",
+    component: Example03
   },
   {
     path: '',
