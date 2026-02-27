@@ -114,8 +114,10 @@ export class Example04 implements OnInit, AfterViewInit, OnDestroy {
 
       // `provideLexer?(this: Hooks<string, string>): (<ParserOutput = string, RendererOutput = string>(src: string, options?: MarkedOptions<ParserOutput, RendererOutput>) => Token[]) | Promise<(<ParserOutput = string, RendererOutput = string>(src: string, options?: MarkedOptions<ParserOutput, RendererOutput>) => Token[])>`
 
+      type T1 = (<ParserOutput = string, RendererOutput = string>(src: string, options?: MarkedOptions<ParserOutput, RendererOutput> | undefined) => Token[]);
+      type promiseT1 = Promise<T1>;
 
-      function provideLexer(this: Hooks<string, string>): <ParserOutput = string, RendererOutput = string>(src: string, options?: MarkedOptions<ParserOutput, RendererOutput> | undefined) => Token[] {
+      function provideLexer(this: Hooks<string, string>): T1 | promiseT1 {
         return <ParserOutput = string, RendererOutput = string>(src: string, options: MarkedOptions<ParserOutput, RendererOutput> | undefined) => {
 
           const lexer = new Lexer(options);
