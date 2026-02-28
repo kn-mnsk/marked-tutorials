@@ -53,18 +53,19 @@ export class Example03 implements OnInit, AfterViewInit, OnDestroy {
 
       const md31 =
       `[valid link](https://example.com)` +
-      `\n` + 
+      `<br><br>` +
       `[invalid link](https://invalidurl.com)`;
 
       const walkTokens = async (token: Tokens.Generic) => {
-        console.log(`Log: Example03 3-1. Custom Extension Example: walkTokens \ntoken=`, token);
+      // const walkTokens = async (token: Tokens.Generic) => {
+        // console.log(`Log: Example03 3-1. Custom Extension Example: walkTokens \ntoken=`, token);
 
         if (token.type === 'link') {
 
           try {
             const response = await fetch('http://localhost:4200/api/exampleCom');
 
-            console.log(`Log: Example03 3-1. Custom Extension Example: walkTokens \ntoken=`, token, `\nfetched url=`, response.url);
+            console.log(`Log: Example03 3-1. Custom Extension Example: walkTokens type=link \ntoken=`, token, `\nfetched url=`, response.url);
             // await fetch(token.href);
             token['title'] = 'valid';
 
@@ -81,7 +82,7 @@ export class Example03 implements OnInit, AfterViewInit, OnDestroy {
 
       this.marked.use({
         async: true,
-        renderer: new Renderer(),
+        // renderer: new Renderer(),
         walkTokens: walkTokens,
       });
 

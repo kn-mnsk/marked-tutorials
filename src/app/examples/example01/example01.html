@@ -1,0 +1,43 @@
+<a [routerLink]="['/home']" routerLinkActive="active"><u><strong>Back to Home</strong></u></a>
+<hr>
+<div class="exampleContainer">
+  <h1>Example 1. Extending Marked</h1>
+  <p><u>see: </u><a ref="https://marked.js.org/using_pro#extensions" target="_blank">Markd Documentation</a></p>
+  <hr>
+  <h2>1-1. The Renderer: `renderer`</h2>
+  <p>The renderer defines the HTML output of a given token. If you supply a renderer in the options object passed to
+    marked.use(), any functions in the object will override the default handling of that token type. ...</p>
+
+  <h4>Example 1-1-1: Overriding output of the default heading token by adding an embedded anchor tag like on GitHub.
+  </h4>
+  <div id="example111"></div>
+
+  <h4>Example 1-1-2: Note: Calling marked.use() in the following way will avoid overriding the heading token output but
+    create a new heading renderer in the process.</h4>
+  <div id="example112"></div>
+
+  <hr>
+  <h2>1-2. The Tokenizer : `tokenizer`</h2>
+  <p>The tokenizer defines how to turn markdown text into tokens. If you supply a tokenizer object to the Marked
+    options, it will be merged with the built-in tokenizer and any functions inside will override the default handling
+    of that token type. ...</p>
+  <h4>Example 1-2: Overriding default codespan tokenizer to include LaTeX.</h4>
+  <div id="example12"></div>
+
+  <hr>
+  <h2>1-3. Walk Tokens : 'walkTokens'</h2>
+  <p>The walkTokens function gets called with every token. Child tokens are called before moving on to sibling tokens.
+    Each token is passed by reference so updates are persisted when passed to the parser. When async mode is enabled,
+    the return value is awaited. Otherwise the return value is ignored. ...</p>
+  <h4>Example 1-3: Overriding heading tokens to start at h2.</h4>
+  <div id="example13"></div>
+
+
+  <hr>
+  <h2>1-4. Hooks : `hooks`</h2>
+  <p>THooks are methods that hook into some part of marked. The following hooks are available: ...</p>
+  <h4>Example 1-4-1: Set options based on <a href="https://www.npmjs.com/package/front-matter"
+      target="_blank">front-matter</a></h4>
+  <div id="example14"></div>
+
+</div>
