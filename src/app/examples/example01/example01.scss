@@ -1,5 +1,9 @@
-.examplecContainer{
+.exampleContainer{
   position: relative;
   padding: 1em;
-  background-color: red;
+  background-color: rgb(227, 229, 233);
+}
+.exampleContainer a {
+  font-style: italic;
+  color: darkcyan;
 }
