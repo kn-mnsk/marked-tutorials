@@ -6,6 +6,8 @@ import { RouterLink } from '@angular/router';
 import { BlockList } from 'node:net';
 import fm, { FrontMatterResult, FrontMatterOptions } from 'front-matter';
 import { HookOptions } from 'node:test';
+import katex from 'katex';
+import { KatexService } from '../katex.service';
 
 @Component({
   selector: 'app-example01',
@@ -28,7 +30,9 @@ export class Example01 implements OnInit, AfterViewInit, OnDestroy {
   private divEl103: HTMLElement | null = null;
   private divEl104: HTMLElement | null = null;
 
-  constructor(@Inject(PLATFORM_ID) platformId: Object,
+  constructor(
+    @Inject(PLATFORM_ID) platformId: Object,
+    private katexService: KatexService,
   ) {
     const isBrowser = isPlatformBrowser(platformId);
     this.$isBrowser.set(isBrowser);
@@ -124,17 +128,36 @@ export class Example01 implements OnInit, AfterViewInit, OnDestroy {
     this.divEl102.innerHTML = '';// initialize
 
     // markdown file
-    const md102 = '$ latex code $\n\n` other code `';
+    const md102 = `
+$latex code E = CM^{2}$
+other code
+`;
+
+    // // Override function - latex
+    // const hooksLatex: HooksObject<string, string> = {
+
+    //   preprocess: (mark: string): string | Promise<string> => {
+    //     console.log(`Log: Example1-2 preprocess  html`, mark);
+
+    //     const html = katex.renderToString(mark);
+
+    //     console.log(`Log: Example1-2 preprocess  html`, html);
+    //     return html;
+    //     // return html;
+    //   }
+    // }
 
     // Override function
     const tokenizer102: TokenizerObject<string, string> = {
       codespan(src: string) {
         const match = src.match(/^\$+([^\$\n]+?)\$+/);
         if (match) {
+          console.log(`Log: Example1-2 tokenizer match`, match);
           return {
             type: 'codespan',
             raw: match[0],
-            text: match[1].trim()
+            text: match[0],
+            // text: match[1].trim()
           };
         }
 
@@ -143,11 +166,15 @@ export class Example01 implements OnInit, AfterViewInit, OnDestroy {
       }
     };
 
-    this.marked.use({ tokenizer: tokenizer102 });
+
+    this.marked.use({ async: true, breaks: true, gfm: true,tokenizer: tokenizer102 });
 
     // run marked
     const html102 = await this.marked.parse(md102);
+
+    console.log(`Log: example1-2 latex`, html102);
     this.divEl102.innerHTML = html102;
+    this.katexService.renderMath(this.divEl102)
 
 
     /** Example 1-3 Walk Tokens : walkTokens
@@ -185,66 +212,66 @@ export class Example01 implements OnInit, AfterViewInit, OnDestroy {
     if (!this.divEl104) return;
     this.divEl104.innerHTML = '';// initialize
 
-    // const md104 =`
-    //   ---
-    //   breaks: true
-    //   ---
+    //     const md104 =`
+    // ---
+    // breaks: true
+    // ---
 
-    //   line1
-    //   line2
-    //   `;
-    const md104 =
-      `---` +
-      `\ntitle: usage of front-matter` +
-      `\nbreaks: true` +
-      `\n---` + `\n` +
-      `line1` +
-      `line2`;
+    // line1
+    // line2
+    // `.trim();
+    const md104 = `
+---
+title: usage example of front-matter
+async: true
+breaks: true
+---
 
+line1
+line2
+`.trim();
+
+    let title: string = '';
     // Override function
-    //HooksObject<ParserOutput = string, RendererOutput = string> = {
-    //preprocess?: ((this: _Hooks<ParserOutput, RendererOutput>, markdown: string) => string | Promise<string>) | undefined;
     const hooks: HooksObject<string, string> = {
 
       preprocess: function (markdown: string): string | Promise<string> {
 
         // const { attributes, body } = fm<any>(markdown);
-        const content = fm<any>(markdown);
-        const attributes = content.attributes;
-        const body = content.body;
-        // const content = fm<any[]>(md);
-        console.log(`Log:  \nattribites=`, content, this.options);
+        const { attributes, body, bodyBegin, frontmatter } = fm<{ title: string, async: true, breaks: boolean }>(markdown);
 
-        let newBody: string[] = [];
+        // console.log(`Log:  \nattributes=`, attributes, `\nbody=`, body, `\nthis.options=`, this.options, `\nmd104`, md104);
+
         for (const prop in attributes) {
+          // console.log(`Log:  \nprop=`, prop);
 
+          console.log(`Log:  \nprop=`, prop);
           switch (prop) {
             case 'title': {
-              newBody.push(`<h3>${attributes[prop]}</h3>`)
+              title = attributes.title;
               break;
             }
             case 'breaks': {
-              const str = body.slice(0, content.bodyBegin) + "<br>" + body.slice(content.bodyBegin);
-
-              newBody.push(str);
+              this.options.breaks = attributes.breaks;
               break;
             }
+            case 'async': {
+              this.options.async = attributes.async;
+              break;
+            }
+
           }
-
         }
-
-        let final: string = '';
-        newBody.forEach(e => final+=e)
-
-        return final;
+        return body;
       }
+
     }
 
-    this.marked.use({ hooks });
+    this.marked.use({ gfm: true, hooks });
 
     // run marked
-    const html104 = await this.marked.parse(md104.trim());
-    this.divEl104.innerHTML = html104;
+    const html104 = await this.marked.parse(md104);
+    this.divEl104.innerHTML = `<h4>${title}<h4>` + html104;
 
   }
 
