@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
 import { BlockList } from 'node:net';
 import fm, { FrontMatterResult, FrontMatterOptions } from 'front-matter';
 
-import DOMPurify from 'isomorphic-dompurify';
+import {sanitize, clearWindow} from 'isomorphic-dompurify';
 
 import { KatexService } from '../katex.service';
 
@@ -282,8 +282,8 @@ line2
       postprocess: (htmlStr: string): string | Promise<string> => {
 
         // sanitize
-
-        const sanitizedHtml =  DOMPurify.sanitize(htmlStr)
+        const sanitizedHtml =  sanitize(htmlStr)
+        clearWindow();
 
         const divEl = document.createElement('div');
         divEl.innerHTML = sanitizedHtml;
