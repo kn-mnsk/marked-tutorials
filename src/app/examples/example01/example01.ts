@@ -281,12 +281,14 @@ line2
 
       postprocess: (htmlStr: string): string | Promise<string> => {
 
+        // do not use
         // sanitize
-        const sanitizedHtml =  sanitize(htmlStr)
-        clearWindow();
+        // const sanitizedHtml =  sanitize(htmlStr)
+        // clearWindow();
 
         const divEl = document.createElement('div');
-        divEl.innerHTML = sanitizedHtml;
+        divEl.innerHTML = htmlStr;
+        // divEl.innerHTML = sanitizedHtml;
         this.katexService.renderMath(divEl);
 
         console.log(`Log: Example1-4-2 preprocess  html`, divEl);
