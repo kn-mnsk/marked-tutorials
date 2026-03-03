@@ -5,8 +5,9 @@ import { Token, Lexer, Renderer, Marked, TokensList, Tokens, MarkedExtension, To
 import { RouterLink } from '@angular/router';
 import { BlockList } from 'node:net';
 import fm, { FrontMatterResult, FrontMatterOptions } from 'front-matter';
-import { HookOptions } from 'node:test';
-import katex from 'katex';
+
+import DOMPurify from 'isomorphic-dompurify';
+
 import { KatexService } from '../katex.service';
 
 @Component({
@@ -275,13 +276,17 @@ line2
 
 `;
 
-    // Override function - latex
-    const hooksLatex: HooksObject<string, string> = {
+    // Override function - sanitize and latex
+    const hooks1042: HooksObject<string, string> = {
 
       postprocess: (htmlStr: string): string | Promise<string> => {
 
+        // sanitize
+
+        const sanitizedHtml =  DOMPurify.sanitize(htmlStr)
+
         const divEl = document.createElement('div');
-        divEl.innerHTML = htmlStr;
+        divEl.innerHTML = sanitizedHtml;
         this.katexService.renderMath(divEl);
 
         console.log(`Log: Example1-4-2 preprocess  html`, divEl);
@@ -292,7 +297,7 @@ line2
 
 
 
-    this.marked.use({ async: true, breaks: true, gfm: true, hooks: hooksLatex });
+    this.marked.use({ async: true, breaks: true, gfm: true, hooks: hooks1042 });
 
     // run marked
     const html1042 = await this.marked.parse(md1042);
