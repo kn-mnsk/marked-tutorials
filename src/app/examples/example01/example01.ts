@@ -272,7 +272,8 @@ line2
     const md1042 = `
 ### Geometry of Space Curve
 
-1. __Length of the smooth space curve C:__ $L = \\int_{t_0}^{t_p}(\\delta_{jk}\\frac{dX^{j}}{dt}\\frac{dX^{k}}{dt})^{1/2}dt$
+1. __Length of the smooth space curve C:__ <br>
+> <bold> $L = \\int_{t_0}^{t_p}(\\delta_{jk}\\frac{dX^{j}}{dt}\\frac{dX^{k}}{dt})^{1/2}dt$ </bold>
 
 `;
 
