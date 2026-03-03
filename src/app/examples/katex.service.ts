@@ -47,7 +47,7 @@ export class KatexService {
 
       });
     });
-    // console.log(`Log ${this.title()} renderMathInElement`, container);
+    console.log(`Log ${this.$title()} renderMathInElement`, container);
   }
 
 }
