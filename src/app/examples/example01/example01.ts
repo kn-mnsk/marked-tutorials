@@ -281,6 +281,7 @@ line2
 
       postprocess: (htmlStr: string): string | Promise<string> => {
 
+        // do not use
         // sanitize
         // const sanitizedHtml =  sanitize(htmlStr)
         // clearWindow();
