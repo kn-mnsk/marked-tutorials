@@ -28,7 +28,8 @@ export class Example01 implements OnInit, AfterViewInit, OnDestroy {
   private divEl1012: HTMLElement | null = null;
   private divEl102: HTMLElement | null = null;
   private divEl103: HTMLElement | null = null;
-  private divEl104: HTMLElement | null = null;
+  private divEl1041: HTMLElement | null = null;
+  private divEl1042: HTMLElement | null = null;
 
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
@@ -118,8 +119,8 @@ export class Example01 implements OnInit, AfterViewInit, OnDestroy {
     this.divEl1012.innerHTML = html1012;
 
 
-    /** Example 1-2 The Tokenizer : tokenizer
-     * verriding default codespan tokenizer to include LaTeX.
+    /** Example 1-2 Overriding default codespan tokenizer to include LaTeX.
+     * Note: Latex does not Work
      */
 
     this.divEl102 = document.getElementById('example12');
@@ -129,23 +130,10 @@ export class Example01 implements OnInit, AfterViewInit, OnDestroy {
 
     // markdown file
     const md102 = `
-$latex code E = CM^{2}$
+latex code: $E = CM^{2}$
 other code
 `;
 
-    // // Override function - latex
-    // const hooksLatex: HooksObject<string, string> = {
-
-    //   preprocess: (mark: string): string | Promise<string> => {
-    //     console.log(`Log: Example1-2 preprocess  html`, mark);
-
-    //     const html = katex.renderToString(mark);
-
-    //     console.log(`Log: Example1-2 preprocess  html`, html);
-    //     return html;
-    //     // return html;
-    //   }
-    // }
 
     // Override function
     const tokenizer102: TokenizerObject<string, string> = {
@@ -156,8 +144,7 @@ other code
           return {
             type: 'codespan',
             raw: match[0],
-            text: match[0],
-            // text: match[1].trim()
+            text: match[1].trim()
           };
         }
 
@@ -167,14 +154,11 @@ other code
     };
 
 
-    this.marked.use({ async: true, breaks: true, gfm: true,tokenizer: tokenizer102 });
+    this.marked.use({ async: true, breaks: true, gfm: true, tokenizer: tokenizer102 });
 
     // run marked
     const html102 = await this.marked.parse(md102);
-
-    console.log(`Log: example1-2 latex`, html102);
     this.divEl102.innerHTML = html102;
-    this.katexService.renderMath(this.divEl102)
 
 
     /** Example 1-3 Walk Tokens : walkTokens
@@ -207,10 +191,10 @@ other code
         * Overriding heading tokens to start at h2.
         */
 
-    this.divEl104 = document.getElementById('example14');
+    this.divEl1041 = document.getElementById('example141');
 
-    if (!this.divEl104) return;
-    this.divEl104.innerHTML = '';// initialize
+    if (!this.divEl1041) return;
+    this.divEl1041.innerHTML = '';// initialize
 
     //     const md104 =`
     // ---
@@ -220,7 +204,7 @@ other code
     // line1
     // line2
     // `.trim();
-    const md104 = `
+    const md1041 = `
 ---
 title: usage example of front-matter
 async: true
@@ -270,8 +254,50 @@ line2
     this.marked.use({ gfm: true, hooks });
 
     // run marked
-    const html104 = await this.marked.parse(md104);
-    this.divEl104.innerHTML = `<h4>${title}<h4>` + html104;
+    const html1041 = await this.marked.parse(md1041);
+    this.divEl1041.innerHTML = `<h4>${title}<h4>` + html1041;
+
+
+
+    /** Example 1-5 Overriding postporcess to render Latrex with Katex.
+    */
+
+    this.divEl1042 = document.getElementById('example142');
+
+    if (!this.divEl1042) return;
+    this.divEl1042.innerHTML = '';// initialize
+
+    // markdown file
+    const md1042 = `
+### Geometry of Space Curve
+
+1. __Length of the smooth space curve C:__ $L = \\int_{t_0}^{t_p}(\\delta_{jk}\\frac{dX^{j}}{dt}\\frac{dX^{k}}{dt})^{1/2}dt$
+
+`;
+
+    // Override function - latex
+    const hooksLatex: HooksObject<string, string> = {
+
+      postprocess: (htmlStr: string): string | Promise<string> => {
+
+        const divEl = document.createElement('div');
+        divEl.innerHTML = htmlStr;
+        this.katexService.renderMath(divEl);
+
+        console.log(`Log: Example1-4-2 preprocess  html`, divEl);
+        return divEl.innerHTML;
+        // return html;
+      }
+    }
+
+
+
+    this.marked.use({ async: true, breaks: true, gfm: true, hooks: hooksLatex });
+
+    // run marked
+    const html1042 = await this.marked.parse(md1042);
+    this.divEl1042.innerHTML = html1042;
+
 
   }
 
@@ -287,7 +313,8 @@ line2
     this.divEl1012 = null;
     this.divEl102 = null;
     this.divEl103 = null;
-    this.divEl104 = null;
+    this.divEl1041 = null;
+    this.divEl1042 = null;
 
   }
 
