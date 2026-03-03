@@ -1,10 +1,5 @@
 import { Routes } from '@angular/router';
-import { CustomMdCompSys } from './examples/custom-md-comp-sys/custom-md-comp-sys';
-import { App } from './app';
-import { ExtendingMark02 } from './examples/extending.mark.02/extending.mark.02';
 import { Home } from './home/home';
-import { Example03 } from './examples/example03/example03';
-import { Example04 } from './examples/example04/example04';
 import { Example01 } from './examples/example01/example01';
 
 export const routes: Routes = [
@@ -18,21 +13,6 @@ export const routes: Routes = [
     path: "example1",
     title: "example1",
     component: Example01
-  },
-  {
-    path: "example2",
-    title: "example2",
-    component: ExtendingMark02
-  },
-  {
-    path: "example3",
-    title: "example3",
-    component: Example03
-  },
-  {
-    path: "example4",
-    title: "example4",
-    component: Example04
   },
   {
     path: '',
