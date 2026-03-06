@@ -6,9 +6,11 @@ import { RouterLink } from '@angular/router';
 import { BlockList } from 'node:net';
 import fm, { FrontMatterResult, FrontMatterOptions } from 'front-matter';
 
-import {sanitize, clearWindow} from 'isomorphic-dompurify';
-
+import { sanitize, clearWindow } from 'isomorphic-dompurify';
+import mermaid from 'mermaid';
 import { KatexService } from '../katex.service';
+import { MermaidService } from '../mermaid.service';
+import { markedStringRenderer } from '../marked.renderer';
 
 @Component({
   selector: 'app-example01',
@@ -35,6 +37,7 @@ export class Example01 implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     @Inject(PLATFORM_ID) platformId: Object,
     private katexService: KatexService,
+    private mermaidService: MermaidService
   ) {
     const isBrowser = isPlatformBrowser(platformId);
     this.$isBrowser.set(isBrowser);
@@ -275,7 +278,20 @@ line2
 1. __Length of the smooth space curve C:__ <br>
 > <bold> $L = \\int_{t_0}^{t_p}(\\delta_{jk}\\frac{dX^{j}}{dt}\\frac{dX^{k}}{dt})^{1/2}dt$ </bold>
 
-`;
+` +
+      '\n```mermaid\
+\n---\
+\nconfig:\
+\n  htmlLabels: false\
+\n---\
+\nflowchart LR\
+\n    markdown["This **is** _Markdown_"]\
+\n    newLines["Line1\
+\n    Line 2\
+\n    Line 3"]\
+\n    markdown --> newLines\
+\n```\
+';
 
     // Override function - sanitize and latex
     const hooks1042: HooksObject<string, string> = {
@@ -288,9 +304,23 @@ line2
         // clearWindow();
 
         const divEl = document.createElement('div');
+        // divEl.append(htmlStr);
         divEl.innerHTML = htmlStr;
+
+
+        console.log(`Log: ${this.$className()} initializeMarked: hooks-preprocess \nhtmlStr=\n `, htmlStr, `\ndivElr=\n`, divEl);
+
         // divEl.innerHTML = sanitizedHtml;
         this.katexService.renderMath(divEl);
+
+        mermaid.initialize({
+          startOnLoad: true,     // We control rendering manually
+          securityLevel: 'strict',
+          legacyMathML: true,
+
+        });
+        this.mermaidService.renderMermaidBlocks(divEl);
+
 
         console.log(`Log: Example1-4-2 preprocess  html`, divEl);
         return divEl.innerHTML;
@@ -300,7 +330,7 @@ line2
 
 
 
-    this.marked.use({ async: true, breaks: true, gfm: true, hooks: hooks1042 });
+    this.marked.use({ async: true, breaks: true, gfm: true, renderer: markedStringRenderer, hooks: hooks1042 });
 
     // run marked
     const html1042 = await this.marked.parse(md1042);
